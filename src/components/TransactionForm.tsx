@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import type { Transaction, Account } from "../types";
 
 interface TransactionFormProps {
@@ -12,21 +12,30 @@ export default function TransactionForm({ onAddTransaction, selectedAccountId, a
     const [description, setDescription] = useState("");
     const [amount, setAmount] = useState("");
     const [type, setType] = useState<"income" | "expense">("expense");
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!description || !amount) return;
+        setIsLoading(true);
 
-        onAddTransaction({
-            description,
-            amount: parseFloat(amount) * (type === "expense" ? -1 : 1),
-            date: new Date().toLocaleDateString("en-US"),
-            type,
-            account_id: selectedAccountId,
-        });
+        if (!description || !amount) {
+            setIsLoading(false);
+            return;
+        }
 
-        setDescription("");
-        setAmount("");
+        setTimeout(() => {
+            onAddTransaction({
+                description,
+                amount: parseFloat(amount) * (type === "expense" ? -1 : 1),
+                date: new Date().toLocaleDateString("en-US"),
+                type,
+                account_id: selectedAccountId,
+            });
+
+            setDescription("");
+            setAmount("");
+            setIsLoading(false);
+        }, 1000); // 1 second delay
     };
 
     const selectedAccount = accounts.find((account) => account.id === selectedAccountId);
@@ -90,9 +99,16 @@ export default function TransactionForm({ onAddTransaction, selectedAccountId, a
 
                 <button
                     type="submit"
-                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className={`w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                        isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                    disabled={isLoading}
                 >
-                    <PlusCircle className="w-4 h-4 mr-2" />
+                    {isLoading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                    )}
                     Add Transaction
                 </button>
             </div>

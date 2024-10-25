@@ -20,8 +20,6 @@ export default function Summary({ transactions, selectedAccountId }: SummaryProp
         .filter((t) => t.type === "income" || t.to_account_id !== null)
         .reduce((sum, t) => Number(sum) + Number(t.amount), 0);
 
-    console.log("income", income);
-
     const expenses = accountTransactions
         .filter((t) => t.type === "expense" || t.from_account_id !== null)
         .reduce((sum, t) => Number(sum) + Number(Math.abs(t.amount)), 0);

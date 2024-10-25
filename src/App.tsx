@@ -17,12 +17,16 @@ function App() {
         fetchTransactions();
     }, []);
 
+    const fetchData = async () => {
+        await fetchAccounts();
+        await fetchTransactions();
+    };
+
     const fetchAccounts = async () => {
         const url = import.meta.env.VITE_API_URL;
         await fetch(`${url}/accounts`)
             .then((res) => res.json())
             .then((data) => {
-                console.log("data", data);
                 setAccounts(data);
             });
     };
@@ -32,7 +36,6 @@ function App() {
         await fetch(`${url}/transactions`)
             .then((res) => res.json())
             .then((data) => {
-                console.log("transactions data", data);
                 setTransactions(data);
             });
     };
@@ -57,20 +60,7 @@ function App() {
             return;
         }
 
-        setTransactions((prev) => [transaction, ...prev]);
-
-        // Update account balance
-        setAccounts((prev) =>
-            prev.map((account) => {
-                if (account.id === newTransaction.account_id) {
-                    return {
-                        ...account,
-                        balance: account.balance + newTransaction.amount,
-                    };
-                }
-                return account;
-            })
-        );
+        fetchData();
     };
 
     const handleAddAccount = async (newAccount: Omit<Account, "id" | "balance">) => {
@@ -96,7 +86,8 @@ function App() {
             return;
         }
 
-        setAccounts((prev) => [...prev, account]);
+        fetchData();
+
         if (!selectedAccountId) {
             setSelectedAccountId(account.id);
         }
