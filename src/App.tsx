@@ -110,7 +110,7 @@ function App() {
                     <h1 className="text-3xl font-bold text-gray-900">Stupid Simple Budget</h1>
                 </div>
 
-                {accounts.length > 0 && (
+                {accounts.length > 0 ? (
                     <div className="mb-8">
                         <AccountsOverview
                             accounts={accounts}
@@ -118,36 +118,43 @@ function App() {
                             onSelectAccount={setSelectedAccountId}
                         />
                     </div>
+                ) : (
+                    <div className="mb-8">Spinning up database...</div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        {accounts.length > 0 && (
-                            <>
-                                {selectedAccountId && (
-                                    <>
-                                        <Summary transactions={transactions} selectedAccountId={selectedAccountId} />
-                                        <TransactionList
-                                            transactions={transactions}
-                                            selectedAccountId={selectedAccountId}
-                                        />
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
+                {accounts.length > 0 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-6">
+                            {accounts.length > 0 && (
+                                <>
+                                    {selectedAccountId && (
+                                        <>
+                                            <Summary
+                                                transactions={transactions}
+                                                selectedAccountId={selectedAccountId}
+                                            />
+                                            <TransactionList
+                                                transactions={transactions}
+                                                selectedAccountId={selectedAccountId}
+                                            />
+                                        </>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
-                    <div className="space-y-6">
-                        {selectedAccountId && (
-                            <TransactionForm
-                                onAddTransaction={handleAddTransaction}
-                                selectedAccountId={selectedAccountId}
-                                accounts={accounts}
-                            />
-                        )}
-                        <AccountForm onAddAccount={handleAddAccount} />
+                        <div className="space-y-6">
+                            {selectedAccountId && (
+                                <TransactionForm
+                                    onAddTransaction={handleAddTransaction}
+                                    selectedAccountId={selectedAccountId}
+                                    accounts={accounts}
+                                />
+                            )}
+                            <AccountForm onAddAccount={handleAddAccount} />
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
