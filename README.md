@@ -1,1 +1,1 @@
-# stupid-simple-budget-v2
+# stupid-simple-budget-frontend
