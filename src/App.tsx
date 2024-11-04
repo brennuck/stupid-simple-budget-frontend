@@ -119,17 +119,12 @@ function App() {
                             {accounts.length > 0 && (
                                 <>
                                     {selectedAccountId && (
-                                        <>
-                                            <Summary
-                                                transactions={transactions}
-                                                selectedAccountId={selectedAccountId}
-                                            />
-                                            <TransactionList
-                                                transactions={transactions}
-                                                selectedAccountId={selectedAccountId}
-                                            />
-                                        </>
+                                        <Summary transactions={transactions} selectedAccountId={selectedAccountId} />
                                     )}
+                                    <TransactionList
+                                        transactions={transactions}
+                                        selectedAccountId={selectedAccountId}
+                                    />
                                 </>
                             )}
                         </div>
