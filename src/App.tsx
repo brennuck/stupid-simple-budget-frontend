@@ -6,6 +6,7 @@ import Summary from "./components/Summary";
 import AccountForm from "./components/AccountForm";
 import AccountsOverview from "./components/AccountsOverview";
 import type { Transaction, Account } from "./types";
+import DownloadData from "./components/DownloadData";
 
 function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -93,6 +94,71 @@ function App() {
         }
     };
 
+    const handleDownloadData = async () => {
+        const url = import.meta.env.VITE_API_URL;
+        await fetch(`${url}/download-data`)
+            .then((res) => res.json())
+            .then((data) => {
+                // Create a Blob from the JSON data
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                // Create a URL for the Blob
+                const downloadUrl = window.URL.createObjectURL(blob);
+                // Create a temporary anchor element
+                const link = document.createElement("a");
+                link.href = downloadUrl;
+                link.download = "budget-data.json";
+                // Trigger the download
+                document.body.appendChild(link);
+                link.click();
+                // Clean up
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+            });
+    };
+
+    const handleUploadData = async () => {
+        // Create file input element
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+
+        input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+
+            try {
+                const url = import.meta.env.VITE_API_URL;
+                // Read file contents
+                const fileContent = await file.text();
+
+                // Send to server
+                const response = await fetch(`${url}/upload-data`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: fileContent,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.statusText}`);
+                }
+
+                // Optional: Handle successful upload
+                console.log("File uploaded successfully");
+
+                // Refresh data after upload
+                await fetchData();
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                // Handle error appropriately (maybe show to user)
+            }
+        };
+
+        // Trigger file selection
+        input.click();
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -138,6 +204,7 @@ function App() {
                                 />
                             )}
                             <AccountForm onAddAccount={handleAddAccount} />
+                            <DownloadData onDownloadPress={handleDownloadData} onUploadPress={handleUploadData} />
                         </div>
                     </div>
                 )}
