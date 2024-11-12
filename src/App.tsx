@@ -12,6 +12,8 @@ function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         fetchAccounts();
@@ -25,20 +27,36 @@ function App() {
 
     const fetchAccounts = async () => {
         const url = import.meta.env.VITE_API_URL;
-        await fetch(`${url}/accounts`)
-            .then((res) => res.json())
-            .then((data) => {
-                setAccounts(data);
-            });
+        try {
+            const res = await fetch(`${url}/accounts`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const data = await res.json();
+            setAccounts(data);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error("Failed to fetch accounts"));
+            setAccounts([]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const fetchTransactions = async () => {
         const url = import.meta.env.VITE_API_URL;
-        await fetch(`${url}/transactions`)
-            .then((res) => res.json())
-            .then((data) => {
-                setTransactions(data);
-            });
+        try {
+            const res = await fetch(`${url}/transactions`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const data = await res.json();
+            setTransactions(data);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error("Failed to fetch transactions"));
+            setTransactions([]);
+        }
     };
 
     const handleAddTransaction = async (newTransaction: Omit<Transaction, "id">) => {
@@ -167,7 +185,35 @@ function App() {
                     <h1 className="text-3xl font-bold text-gray-900">Stupid Simple Budget</h1>
                 </div>
 
-                {accounts.length > 0 ? (
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                        <p className="mt-4 text-gray-600">Loading your budget data...</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No data found</h2>
+                            <p className="text-gray-600">Get started by uploading your existing budget data.</p>
+                        </div>
+                        <div className="space-x-4">
+                            <button
+                                onClick={handleUploadData}
+                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                                    />
+                                </svg>
+                                Upload Data
+                            </button>
+                        </div>
+                    </div>
+                ) : (
                     <div className="mb-8">
                         <AccountsOverview
                             accounts={accounts}
@@ -175,8 +221,6 @@ function App() {
                             onSelectAccount={setSelectedAccountId}
                         />
                     </div>
-                ) : (
-                    <div className="mb-8">Spinning up database...</div>
                 )}
 
                 {accounts.length > 0 && (
