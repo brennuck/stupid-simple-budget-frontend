@@ -12,6 +12,7 @@ export default function TransactionForm({ onAddTransaction, selectedAccountId, a
     const [description, setDescription] = useState("");
     const [amount, setAmount] = useState("");
     const [type, setType] = useState<"income" | "expense">("expense");
+    const [takeFromSavings, setTakeFromSavings] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,12 +31,14 @@ export default function TransactionForm({ onAddTransaction, selectedAccountId, a
                 date: new Date().toLocaleDateString("en-US"),
                 type,
                 account_id: selectedAccountId,
+                take_from_savings: takeFromSavings,
             });
 
             setDescription("");
             setAmount("");
+            setTakeFromSavings(true);
             setIsLoading(false);
-        }, 1000); // 1 second delay
+        }, 333);
     };
 
     const selectedAccount = accounts.find((account) => account.id === selectedAccountId);
@@ -96,6 +99,20 @@ export default function TransactionForm({ onAddTransaction, selectedAccountId, a
                         step="0.01"
                     />
                 </div>
+
+                {selectedAccount.type !== "savings" && (
+                    <div className="mt-4">
+                        <label className="inline-flex items-center">
+                            <input
+                                type="checkbox"
+                                className="form-checkbox text-blue-600 rounded"
+                                checked={takeFromSavings}
+                                onChange={(e) => setTakeFromSavings(e.target.checked)}
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Take from savings</span>
+                        </label>
+                    </div>
+                )}
 
                 <button
                     type="submit"

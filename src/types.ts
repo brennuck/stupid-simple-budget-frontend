@@ -7,6 +7,7 @@ export interface Transaction {
     account_id: string;
     to_account_id?: string;
     from_account_id?: string;
+    take_from_savings?: boolean;
 }
 
 export interface Category {
